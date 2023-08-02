@@ -43,19 +43,5 @@ export default class FilenameLinterSettingTab extends PluginSettingTab {
 					})
 			);
 
-		new Setting(containerEl)
-			.setName('Auto-lint after rename')
-			.setDesc(
-				'When an existing file is renamed, automatically lint its name'
-			)
-			.addToggle((toggle) =>
-				toggle
-					.setValue(this.plugin.settings.autoLintOnRename)
-					.onChange(async (value) => {
-						this.plugin.settings.autoLintOnRename = value;
-						await this.plugin.saveSettings();
-						this.plugin.autoLintOnRenameToggle(value);
-					})
-			);
 	}
 }

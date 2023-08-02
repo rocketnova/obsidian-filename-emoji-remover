@@ -4,7 +4,6 @@ import FilenameLinterSettingTab from './settings';
 
 const DEFAULT_SETTINGS: FilenameLinterSettings = {
 	autoLintOnCreate: false,
-	autoLintOnRename: false,
 };
 
 export default class FilenameLinter extends Plugin {
@@ -67,25 +66,11 @@ export default class FilenameLinter extends Plugin {
 		}
 	}
 
-	async autoLintOnRenameToggle(toggle: boolean) {
-		this.app.vault.off('rename', this.lintFilename);
-
-		if (toggle) {
-			this.registerEvent(
-				this.app.vault.on('rename', this.lintFilename)
-			);
-		}
-	}
-
 	async onload() {
 		await this.loadSettings();
 
 		if (this.settings.autoLintOnCreate) {
 			this.autoLintOnCreateToggle(true);
-		}
-
-		if (this.settings.autoLintOnRename) {
-			this.autoLintOnRenameToggle(true);
 		}
 
 		// This adds a simple command that can be triggered anywhere
