@@ -26,6 +26,7 @@ export default class FilenameLinter extends Plugin {
 
 		let filePath = file.parent.path;
 
+		// Replaces these bad filename characters: []:\/^|#
 		newFilename = filename.replaceAll(/[\[\]:\/\^\|#]/ig, '');
 		if (newFilename !== oldFilename) {
 			// Make sure the new file name isn't empty
@@ -36,9 +37,12 @@ export default class FilenameLinter extends Plugin {
 			}
 
 			let newFilePath = `${filePath}/${newFilename}.${fileExtension}`;
-			await fileManager.renameFile(file, newFilePath);
-
-			new Notice(`${oldFilename} is renamed to ${newFilename}`);
+			try {
+				await fileManager.renameFile(file, newFilePath);
+				new Notice(`${oldFilename} renamed to ${newFilename}`);
+			} catch (error) {
+				new Notice(`Unable to rename ${oldFilename} to ${newFilename}. There probably already exists a file with this name`);
+			}
 		}
 	};
 
