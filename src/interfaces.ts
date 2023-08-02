@@ -1,4 +1,4 @@
-export interface FilenameEmojiRemoverSettings {
-	autoRemoveOnCreate: boolean;
-	autoRemoveOnRename: boolean;
+export interface FilenameLinterSettings {
+	autoLintOnCreate: boolean;
+	autoLintOnRename: boolean;
 }

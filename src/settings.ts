@@ -1,10 +1,10 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
-import type FilenameEmojiRemover from './main';
+import type FilenameLinter from './main';
 
-export default class FilenameEmojiRemoverSettingTab extends PluginSettingTab {
-	plugin: FilenameEmojiRemover;
+export default class FilenameLinterSettingTab extends PluginSettingTab {
+	plugin: FilenameLinter;
 
-	constructor(app: App, plugin: FilenameEmojiRemover) {
+	constructor(app: App, plugin: FilenameLinter) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -17,44 +17,44 @@ export default class FilenameEmojiRemoverSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName('Remove manually')
 			.setDesc(
-				'Scan all your existing files and remove emojis from their names'
+				'Lint all filenames in the vault'
 			)
 			.addButton((button) =>
 				button
 					.setWarning()
-					.setButtonText('Remove')
+					.setButtonText('Lint')
 					.onClick(async (evt: MouseEvent) => {
-						await this.plugin.removeEmojiFromAllFilenames();
+						await this.plugin.lintAllFilenames();
 					})
 			);
 
 		new Setting(containerEl)
-			.setName('Auto-remove for new files')
+			.setName('Auto-lint new files')
 			.setDesc(
-				'When a new file is created, automatically remove emojis from its name'
+				'When a new file is created, automatically lint its name'
 			)
 			.addToggle((toggle) =>
 				toggle
-					.setValue(this.plugin.settings.autoRemoveOnCreate)
+					.setValue(this.plugin.settings.autoLintOnCreate)
 					.onChange(async (value) => {
-						this.plugin.settings.autoRemoveOnCreate = value;
+						this.plugin.settings.autoLintOnCreate = value;
 						await this.plugin.saveSettings();
-						this.plugin.autoRemoveOnCreateToggle(value);
+						this.plugin.autoLintOnCreateToggle(value);
 					})
 			);
 
 		new Setting(containerEl)
-			.setName('Auto-remove after rename')
+			.setName('Auto-lint after rename')
 			.setDesc(
-				'When an existing file is renamed, automatically remove emojis from its name'
+				'When an existing file is renamed, automatically lint its name'
 			)
 			.addToggle((toggle) =>
 				toggle
-					.setValue(this.plugin.settings.autoRemoveOnRename)
+					.setValue(this.plugin.settings.autoLintOnRename)
 					.onChange(async (value) => {
-						this.plugin.settings.autoRemoveOnRename = value;
+						this.plugin.settings.autoLintOnRename = value;
 						await this.plugin.saveSettings();
-						this.plugin.autoRemoveOnRenameToggle(value);
+						this.plugin.autoLintOnRenameToggle(value);
 					})
 			);
 	}

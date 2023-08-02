@@ -1,19 +1,16 @@
 import { Notice, Plugin, TAbstractFile, TFile } from 'obsidian';
-import type { FilenameEmojiRemoverSettings } from './interfaces';
-import FilenameEmojiRemoverSettingTab from './settings';
-import emojiRegex from 'emoji-regex';
+import type { FilenameLinterSettings } from './interfaces';
+import FilenameLinterSettingTab from './settings';
 
-const DEFAULT_SETTINGS: FilenameEmojiRemoverSettings = {
-	autoRemoveOnCreate: false,
-	autoRemoveOnRename: false,
+const DEFAULT_SETTINGS: FilenameLinterSettings = {
+	autoLintOnCreate: false,
+	autoLintOnRename: false,
 };
 
-export default class FilenameEmojiRemover extends Plugin {
-	settings: FilenameEmojiRemoverSettings;
+export default class FilenameLinter extends Plugin {
+	settings: FilenameLinterSettings;
 
-	emojiRegex = emojiRegex();
-
-	removeEmojiFromFilename = async (file: TAbstractFile) => {
+	lintFilename = async (file: TAbstractFile) => {
 		const { fileManager } = this.app;
 
 		if (!(file instanceof TFile)) {
@@ -29,13 +26,13 @@ export default class FilenameEmojiRemover extends Plugin {
 
 		let filePath = file.parent.path;
 
-		newFilename = filename.replaceAll(this.emojiRegex, '');
+		newFilename = filename.replaceAll(/[\[\]:\/\^\|#]/ig, '');
 		if (newFilename !== oldFilename) {
 			// Make sure the new file name isn't empty
 			// Randomize if it is
 			if (newFilename.length === 0) {
 				const randomNumber = Math.floor(1000 + Math.random() * 9000);
-				newFilename = `emoji-only-name-${randomNumber}`;
+				newFilename = `file-${randomNumber}`;
 			}
 
 			let newFilePath = `${filePath}/${newFilename}.${fileExtension}`;
@@ -45,33 +42,33 @@ export default class FilenameEmojiRemover extends Plugin {
 		}
 	};
 
-	removeEmojiFromAllFilenames = async () => {
+	lintAllFilenames = async () => {
 		const { vault } = this.app;
 
 		await Promise.all(
 			// Get all the files in the vault
 			vault.getFiles().map(async (file) => {
-				await this.removeEmojiFromFilename(file);
+				await this.lintFilename(file);
 			})
 		);
 	};
 
-	async autoRemoveOnCreateToggle(toggle: boolean) {
-		this.app.vault.off('create', this.removeEmojiFromFilename);
+	async autoLintOnCreateToggle(toggle: boolean) {
+		this.app.vault.off('create', this.lintFilename);
 
 		if (toggle) {
 			this.registerEvent(
-				this.app.vault.on('create', this.removeEmojiFromFilename)
+				this.app.vault.on('create', this.lintFilename)
 			);
 		}
 	}
 
-	async autoRemoveOnRenameToggle(toggle: boolean) {
-		this.app.vault.off('rename', this.removeEmojiFromFilename);
+	async autoLintOnRenameToggle(toggle: boolean) {
+		this.app.vault.off('rename', this.lintFilename);
 
 		if (toggle) {
 			this.registerEvent(
-				this.app.vault.on('rename', this.removeEmojiFromFilename)
+				this.app.vault.on('rename', this.lintFilename)
 			);
 		}
 	}
@@ -79,25 +76,25 @@ export default class FilenameEmojiRemover extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
-		if (this.settings.autoRemoveOnCreate) {
-			this.autoRemoveOnCreateToggle(true);
+		if (this.settings.autoLintOnCreate) {
+			this.autoLintOnCreateToggle(true);
 		}
 
-		if (this.settings.autoRemoveOnRename) {
-			this.autoRemoveOnRenameToggle(true);
+		if (this.settings.autoLintOnRename) {
+			this.autoLintOnRenameToggle(true);
 		}
 
 		// This adds a simple command that can be triggered anywhere
 		this.addCommand({
-			id: 'remove-emoji-from-all-filenames',
-			name: 'Remove emojis from all filenames',
+			id: 'lint-all-filenames',
+			name: 'Lint all filenames in the vault',
 			callback: () => {
-				this.removeEmojiFromAllFilenames();
+				this.lintAllFilenames();
 			},
 		});
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new FilenameEmojiRemoverSettingTab(this.app, this));
+		this.addSettingTab(new FilenameLinterSettingTab(this.app, this));
 	}
 
 	onunload() {}
